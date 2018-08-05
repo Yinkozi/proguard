@@ -250,7 +250,7 @@ public class ConfigurationParser
 
     private long parseIncludeArgument(long lastModified) throws ParseException, IOException
     {
-        // Read the configuration file name.
+           // Read the configuration file name.
         readNextWord("configuration file name", true, true, false);
 
         URL baseURL = reader.getBaseURL();
@@ -263,33 +263,35 @@ public class ConfigurationParser
         }
         catch (MalformedURLException ex) {}
 
-        if (url != null)
-        {
-            reader.includeWordReader(new FileWordReader(url));
-        }
-        // Is it relative to a URL or to a file?
-        else if (baseURL != null)
-        {
-            url = new URL(baseURL, nextWord);
-            reader.includeWordReader(new FileWordReader(url));
-        }
-        else
-        {
-            // Is the file a valid resource URL?
-            url = ConfigurationParser.class.getResource(nextWord);
+        if (!nextWord.contains("proguard_xamarin.cfg")) {
             if (url != null)
             {
                 reader.includeWordReader(new FileWordReader(url));
             }
+            // Is it relative to a URL or to a file?
+            else if (baseURL != null)
+            {
+                url = new URL(baseURL, nextWord);
+                reader.includeWordReader(new FileWordReader(url));
+            }
             else
             {
-                File file = file(nextWord);
-                reader.includeWordReader(new FileWordReader(file));
-
-                long fileLastModified = file.lastModified();
-                if (fileLastModified > lastModified)
+                // Is the file a valid resource URL?
+                url = ConfigurationParser.class.getResource(nextWord);
+                if (url != null)
                 {
-                    lastModified = fileLastModified;
+                    reader.includeWordReader(new FileWordReader(url));
+                }
+                else
+                {
+                    File file = file(nextWord);
+                    reader.includeWordReader(new FileWordReader(file));
+
+                    long fileLastModified = file.lastModified();
+                    if (fileLastModified > lastModified)
+                    {
+                        lastModified = fileLastModified;
+                    }
                 }
             }
         }
